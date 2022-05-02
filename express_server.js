@@ -56,7 +56,14 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // requests to the endpoint will redirect to its longURL
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = generateRandomString;
+  const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
+});
+
+// delete operation to remove existing shortURL from our database and redirect user back to index page
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
