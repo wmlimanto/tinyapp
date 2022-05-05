@@ -22,6 +22,14 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// endpoint to handle get to register/sign up
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("register", templateVars);
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -91,3 +99,4 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect('/urls');
 });
+
