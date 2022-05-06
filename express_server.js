@@ -111,9 +111,11 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // endpoint to handle post to login
 app.get('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
-  res.redirect('/urls');
+  const templateVars = {
+    "user_id": req.cookies["user_id"],
+    "user": users[req.cookies["user_id"]]
+  };
+  res.render("login", templateVars);
 });
 
 // endpoint to handle post to logout
@@ -143,7 +145,7 @@ app.post("/register", (req, res) => {
   }
   // if email is already in users obj
   if (emailAlreadyExists(email, users)) {
-    return res.status(400).send("This email already exists!");
+    return res.status(400).send("Email has already been taken!");
   }
 
   const user = {
