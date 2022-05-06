@@ -18,6 +18,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// users obj to store and access users in the app
+const users = {
+  "drake": {
+    id: "drake", 
+    email: "drakeovo@gmail.com",
+    password: "toronto6"
+  },
+  "alex": {
+    id: "alex",
+    email: "alex@gmail.com",
+    password: "12345"
+  }
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -25,7 +39,8 @@ app.get("/", (req, res) => {
 // endpoint to handle get to register/sign up
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    "user_id": req.cookies["user_id"],
+    user: users[req.cookies["user_id"]]
   };
   res.render("register", templateVars);
 });
@@ -39,15 +54,20 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, 
-    username: req.cookies["username"] };
+  const templateVars = {
+    urls: urlDatabase, 
+    userID: req.cookies["user_id"],
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_index", templateVars);
 });
 
 // server renders urls_new template and user inputs new longURL to shorten
 app.get("/urls/new", (req, res) => {
-  const templateVars = { urls: urlDatabase,
-    username: req.cookies["username"] };
+  const templateVars = { 
+    userID: req.cookies["user_id"],
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -62,7 +82,9 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL], 
-    username: req.cookies["username"] };
+    userID: req.cookies["user_id"],
+    user: users[req.cookies["user_id"]] 
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -96,7 +118,21 @@ app.post('/login', (req, res) => {
 
 // endpoint to handle post to logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
+// endpoint to handle post to registration form data
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  users[userID] = {
+    id: userID,
+    email: email,
+    password: password
+  };
+  console.log(users);
+  res.cookie("user_id", userID);
+  res.redirect("/urls");
+});
