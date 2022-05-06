@@ -20,10 +20,10 @@ const urlDatabase = {
 
 // users obj to store and access users in the app
 const users = {
-  "drake": {
-    id: "drake", 
-    email: "drakeovo@gmail.com",
-    password: "toronto6"
+  "bob": {
+    id: "bob", 
+    email: "bob@gmail.com",
+    password: "123456"
   },
   "alex": {
     id: "alex",
@@ -36,14 +36,14 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-// endpoint to handle get to register/sign up
-app.get("/register", (req, res) => {
-  const templateVars = {
-    "user_id": req.cookies["user_id"],
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("register", templateVars);
-});
+// endpoint to handle error if email is already in users obj
+const emailAlreadyExists = (email, users) => {
+  for (let user in users) {
+    if (users[user].email === email) {
+      return users[user];
+    } 
+  } return false;
+};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -110,7 +110,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 // endpoint to handle post to login
-app.post('/login', (req, res) => {
+app.get('/login', (req, res) => {
   const username = req.body.username;
   res.cookie("username", username);
   res.redirect('/urls');
@@ -122,16 +122,36 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
+// endpoint to handle get to register/sign up
+app.get("/register", (req, res) => {
+  const templateVars = {
+    "user_id": req.cookies["user_id"],
+    "user": users[req.cookies["user_id"]]
+  };
+  res.render("register", templateVars);
+});
+
 // endpoint to handle post to registration form data
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  users[userID] = {
+
+  // if email or password are empty strings
+  if (!email || !password) {
+    return res.status(400).send("Email and Password must be filled in!");
+  }
+  // if email is already in users obj
+  if (emailAlreadyExists(email, users)) {
+    return res.status(400).send("This email already exists!");
+  }
+
+  const user = {
     id: userID,
     email: email,
     password: password
   };
+  users[userID] = user;
   console.log(users);
   res.cookie("user_id", userID);
   res.redirect("/urls");
