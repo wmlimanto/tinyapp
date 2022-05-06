@@ -12,7 +12,10 @@
     </div>
     <% if (!user) { %>
       <div class="navbar-nav ml-auto"></div>
-        <form class="form-inline" method="POST" action="/register">
+        <form class="form-inline" method="GET" action="/login">
+          <button type="submit" class="btn btn-outline-dark">Sign In</button>
+        </form>
+        <form class="form-inline" method="GET" action="/register">
           <button type="submit" class="btn btn-outline-dark">Sign Up</button>
         </form>
     <% } else if (user) { %>
