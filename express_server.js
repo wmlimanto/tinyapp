@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
 });
 
 // endpoint to handle error if email is already in users obj
-const emailAlreadyExists = (email, users) => {
+const verifyEmail = (email, users) => {
   for (let user in users) {
     if (users[user].email === email) {
       return users[user];
@@ -118,10 +118,32 @@ app.get('/login', (req, res) => {
   res.render("login", templateVars);
 });
 
+// endpoint to handle post to login using email address
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = verifyEmail(email, users);
+
+  // if user with that email cannot be found
+  if (!user) {
+    return res.status(403).send("This email does not exist, please try again!");
+  }
+
+  // if user password verification passes
+  if (user.password === password) {
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+    return;
+  } else {
+    // if password does not match
+    return res.status(403).send("Wrong password, please try again!");
+  }
+});
+
 // endpoint to handle post to logout
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 // endpoint to handle get to register/sign up
@@ -144,7 +166,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and Password must be filled in!");
   }
   // if email is already in users obj
-  if (emailAlreadyExists(email, users)) {
+  if (verifyEmail(email, users)) {
     return res.status(400).send("Email has already been taken!");
   }
 
@@ -158,5 +180,3 @@ app.post("/register", (req, res) => {
   res.cookie("user_id", userID);
   res.redirect("/urls");
 });
-
-// new branch
