@@ -11,19 +11,21 @@
       </div>
     </div>
     <% if (!user) { %>
-      <div class="navbar-nav ml-auto"></div>
+      <div class="navbar-nav ml-auto">
         <form class="form-inline" method="GET" action="/login">
-          <button type="submit" class="btn btn-outline-dark">Sign In</button>
+          <a class="nav-item nav-link" href="/login">Login</a>
         </form>
         <form class="form-inline" method="GET" action="/register">
-          <button type="submit" class="btn btn-outline-dark">Sign Up</button>
+          <a class="nav-item nav-link" href="/register">Register</a>
         </form>
+      </div>
     <% } else if (user) { %>
-      <div class="navbar-nav ml-auto"></div>
-        <p>Signed In As:  <%= user.email %>! </p>
+      <div class="navbar-nav ml-auto">
+        <p>Logged In As:  <%= user.email %>! </p>
           <form method="POST" action="/logout">
-            <button type="submit" class="btn btn-outline-dark">Sign Out</button>
+            <button type="submit" class="btn btn-outline-dark">Logout</button>
           </form>
+      </div>
     <% } %>   
   </nav>
 </header>
