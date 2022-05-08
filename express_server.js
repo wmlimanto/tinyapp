@@ -1,36 +1,23 @@
 const express = require('express');
 const app = express();
-const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { getUserByEmail, urlsForUser } = require("./helpers");
+const PORT = 8080;
+const { 
+  generateRandomString,
+  getUserByEmail, 
+  urlsForUser 
+} = require("./helpers");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2', 'key3'],
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000 // max cookie age 24 hours
 }));
 
-const generateRandomString = function() {
-  return Math.random().toString(36).substring(2, 8)
-};
-
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "bob"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "alex"
-  }
-};
-
-// users obj to store and access users in the app
 const users = {
   "bob": {
     id: "bob", 
@@ -44,19 +31,35 @@ const users = {
   }
 };
 
+const urlDatabase = {
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "bob"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "alex"
+  }
+};
+
+
+// ** intro requests **
+
 app.get("/", (req, res) => {
   res.send("Hello!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// endpoint to handle get to register/sign up
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
+
+
+// ** GET & POST for registration **
+
 app.get("/register", (req, res) => {
   const templateVars = {
     "user_id": req.session.user_id,
@@ -65,7 +68,6 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-// endpoint to handle post to registration form data
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
@@ -91,7 +93,9 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-// endpoint to handle post to login
+
+// ** GET & POST for login **
+
 app.get('/login', (req, res) => {
   const templateVars = {
     "user_id": req.session.user_id,
@@ -100,7 +104,6 @@ app.get('/login', (req, res) => {
   res.render("login", templateVars);
 });
 
-// endpoint to handle post to login using email address
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -121,6 +124,9 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Wrong password, please try again!");
   }
 });
+
+
+// ** GET REQUESTS **
 
 // only logged in users can see their shortened urls
 app.get("/urls", (req, res) => {
@@ -172,6 +178,9 @@ app.get("/u/:shortURL", (req, res) => {
     res.status(400).send("This URL ID does not exist, please check again!");
   }
 });
+
+
+// ** POST REQUESTS **
 
 // server generates a shortURL and adds it to database
 app.post("/urls", (req, res) => {
