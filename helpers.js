@@ -1,4 +1,7 @@
-// endpoint to handle error if email is already in users obj
+const generateRandomString = function() {
+  return Math.random().toString(36).substring(2, 8)
+};
+
 const getUserByEmail = (email, users) => {
   for (let user in users) {
     if (users[user].email === email) {
@@ -7,7 +10,6 @@ const getUserByEmail = (email, users) => {
   } return false;
 };
 
-// urls belong to users
 const urlsForUser = (userID, urlDatabase) => {
   const userURL = {};
   for (let url in urlDatabase) {
@@ -17,4 +19,4 @@ const urlsForUser = (userID, urlDatabase) => {
   } return userURL;
 };
 
-module.exports = { getUserByEmail, urlsForUser };
+module.exports = { generateRandomString, getUserByEmail, urlsForUser };
