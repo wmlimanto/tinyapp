@@ -4,6 +4,7 @@ const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const { getUserByEmail, urlsForUser } = require("./helpers");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -55,25 +56,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// endpoint to handle error if email is already in users obj
-const verifyEmail = (email, users) => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    } 
-  } return false;
-};
-
-// urls belong to users
-const urlsForUser = (userID, urlDatabase) => {
-  const userURL = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === userID) {
-      userURL[url] = urlDatabase[url];
-    }
-  } return userURL;
-};
-
 // endpoint to handle get to register/sign up
 app.get("/register", (req, res) => {
   const templateVars = {
@@ -101,7 +83,7 @@ app.post("/register", (req, res) => {
   };
 
   // if email is already in users obj
-  if (verifyEmail(email, users)) {
+  if (getUserByEmail(email, users)) {
     return res.status(400).send("Email has already been taken!");
   }
   users[userID] = newUser;
@@ -122,7 +104,7 @@ app.get('/login', (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = verifyEmail(email, users);
+  const user = getUserByEmail(email, users);
 
   // if user with that email cannot be found
   if (!user) {
