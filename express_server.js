@@ -204,6 +204,7 @@ app.post("/urls", (req, res) => {
 
 // handle post request to update a resource
 app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
   const userID = req.cookies["user_id"];
   if (!userID) {
     res.status(403).send("You are not logged in!");
@@ -214,9 +215,6 @@ app.post("/urls/:shortURL", (req, res) => {
     };
     res.redirect("urls_index");
   }
-  // const shortURL = req.params.shortURL;
-  // urlDatabase[shortURL] = req.body.longURL;
-  // res.redirect("/urls");
 });
 
 // only creator of the url can edit or delete the link
