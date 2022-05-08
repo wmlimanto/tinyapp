@@ -4,6 +4,7 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const { restart } = require("nodemon");
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -29,12 +30,12 @@ const users = {
   "bob": {
     id: "bob", 
     email: "bob@gmail.com",
-    password: "123456"
+    password: "123456abc"
   },
   "alex": {
     id: "alex",
     email: "alex@gmail.com",
-    password: "12345"
+    password: "12345def"
   }
 };
 
@@ -83,23 +84,23 @@ app.post("/register", (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   // if email or password are empty strings
   if (!email || !password) {
     return res.status(400).send("Email and Password must be filled in!");
   }
+  const newUser = {
+    id: userID,
+    email: email,
+    password: hashedPassword
+  };
+
   // if email is already in users obj
   if (verifyEmail(email, users)) {
     return res.status(400).send("Email has already been taken!");
   }
-
-  const user = {
-    id: userID,
-    email: email,
-    password: password
-  };
-  users[userID] = user;
-  console.log(users);
+  users[userID] = newUser;
   res.cookie("user_id", userID);
   res.redirect("/urls");
 });
@@ -125,7 +126,7 @@ app.post("/login", (req, res) => {
   }
 
   // if user password verification passes
-  if (user.password === password) {
+  if (bcrypt.compare(password, user.password)) {
     res.cookie('user_id', user.id);
     res.redirect("/urls");
     return;
