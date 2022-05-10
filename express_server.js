@@ -57,6 +57,7 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
+  console.log("hashed password: ", hashedPassword);
 
   // if email or password are empty strings
   if (!email || !password) {
@@ -92,6 +93,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = getUserByEmail(email, users);
+  console.log("this is the user: ", user)
 
   // if user with that email cannot be found
   if (!user) {
@@ -99,14 +101,18 @@ app.post("/login", (req, res) => {
   }
 
   // if user password verification passes
-  if (bcrypt.compare(password, user.password)) {
-    req.session.user_id = user.id;
-    res.redirect("/urls");
-    return;
-  } else {
-    // if password does not match
-    return res.status(403).send("Wrong password, please try again!");
-  }
+  let bcryptResponse = bcrypt.compare(password, user.password);
+  console.log("bcrypt response: ", bcryptResponse);
+  bcrypt.compare(password, user.password, (err, bres) => {
+    console.log("this is the error: ", err);
+    console.log("this is the bres: ", bres);
+    if (bres == true) {
+      req.session.user_id = user.id;
+      res.redirect("/urls");
+    } else {
+      return res.status(403).send("Wrong password, please try again!");
+    }
+  })
 });
 
 
