@@ -1,16 +1,16 @@
 const express = require('express');
 const app = express();
+const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const PORT = 8080;
 const { 
   generateRandomString,
   getUserByEmail, 
   urlsForUser 
 } = require("./helpers");
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
@@ -42,22 +42,6 @@ const urlDatabase = {
   }
 };
 
-
-// ** intro requests **
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
-
 // ** GET & POST for registration **
 
 app.get("/register", (req, res) => {
@@ -79,13 +63,13 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and Password must be filled in!");
   }
   const newUser = {
-    id: userID,
-    email: email,
-    password: hashedPassword
+    'id': userID,
+    'email': email,
+    'password': hashedPassword,
   };
 
   // if email is already in users obj
-  if (getUserByEmail(email, users)) {
+  if (getUserByEmail(email, newUser)) {
     return res.status(400).send("Email has already been taken!");
   }
   users[userID] = newUser;
@@ -128,6 +112,14 @@ app.post("/login", (req, res) => {
 
 // ** GET REQUESTS **
 
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
 // only logged in users can see their shortened urls
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
@@ -136,10 +128,10 @@ app.get("/urls", (req, res) => {
     const templateVars = {
       user: users[userID],
       urls: urlsForUser(userID, urlDatabase)
-    }
+    };
     res.render("urls_index", templateVars);
   } else {
-    return res.status(400).send("Please login to access the site!");
+    return res.status(401).send("Please login to access the site!");
   }
 });
 
@@ -154,16 +146,16 @@ app.get("/urls/new", (req, res) => {
     };
     res.render("urls_new", templateVars);
   } else {
-    res.redirect("/login");
+    return res.status(401).send("Please login to access the site!");
   }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL], 
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
     userID: req.session.user_id,
-    user: users[req.session.user_id] 
+    user: users[req.session.user_id]
   };
   res.render("urls_show", templateVars);
 });
@@ -175,7 +167,7 @@ app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[shortURL]['longURL'];
     res.redirect(longURL);
   } else {
-    res.status(400).send("This URL ID does not exist, please check again!");
+    res.status(404).send("This URL ID does not exist, please check again!");
   }
 });
 
@@ -208,7 +200,7 @@ app.post("/urls/:shortURL", (req, res) => {
       longURL: req.body.longURL,
       userID
     };
-    res.redirect("urls_index");
+    res.redirect("/urls");
   }
 });
 
@@ -228,4 +220,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect('/login');
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });

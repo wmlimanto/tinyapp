@@ -2,14 +2,16 @@ const generateRandomString = function() {
   return Math.random().toString(36).substring(2, 8)
 };
 
+// endpoint to handle error if email is already in users obj
 const getUserByEmail = (email, users) => {
   for (let user in users) {
     if (users[user].email === email) {
       return users[user];
-    } 
+    }
   } return false;
 };
 
+// urls belong to users
 const urlsForUser = (userID, urlDatabase) => {
   const userURL = {};
   for (let url in urlDatabase) {
