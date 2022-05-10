@@ -137,7 +137,7 @@ app.get("/urls", (req, res) => {
     };
     res.render("urls_index", templateVars);
   } else {
-    return res.status(401).send("Please login to access the site!");
+    return res.status(401).send("Only logged in users can access this page!");
   }
 });
 
@@ -156,7 +156,11 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+// fixed bug where user A can edit or delete user B's short URL
 app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const userID = req.session.user_id;
+  if (userID == urlDatabase[shortURL].userID) {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
@@ -164,6 +168,9 @@ app.get("/urls/:shortURL", (req, res) => {
     user: users[req.session.user_id]
   };
   res.render("urls_show", templateVars);
+  } else {
+    return res.status(401).send("You're not allowed to acces or edit this URL!");
+  }
 });
 
 // requests to the endpoint will redirect to its longURL
