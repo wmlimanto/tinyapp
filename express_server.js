@@ -70,7 +70,9 @@ app.post("/register", (req, res) => {
   };
 
   // if email is already in users obj
-  if (getUserByEmail(email, newUser)) {
+  // const checkEmail = getUserByEmail(email, users);
+  // console.log("check email: ", checkEmail);
+  if (getUserByEmail(email, users)) {
     return res.status(400).send("Email has already been taken!");
   }
   users[userID] = newUser;
@@ -119,7 +121,7 @@ app.post("/login", (req, res) => {
 // ** GET REQUESTS **
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/login');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -187,7 +189,6 @@ app.get("/u/:shortURL", (req, res) => {
 
 // ** POST REQUESTS **
 
-// server generates a shortURL and adds it to database
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (userID) {
@@ -203,7 +204,7 @@ app.post("/urls", (req, res) => {
 });
 
 // handle post request to update a resource
-app.post("/urls/:shortURL", (req, res) => {
+app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
   if (!userID) {
