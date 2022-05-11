@@ -57,8 +57,6 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  console.log("hashed password: ", hashedPassword);
-
   // if email or password are empty strings
   if (!email || !password) {
     return res.status(400).send("Email and Password must be filled in!");
@@ -68,10 +66,7 @@ app.post("/register", (req, res) => {
     'email': email,
     'password': hashedPassword,
   };
-
   // if email is already in users obj
-  // const checkEmail = getUserByEmail(email, users);
-  // console.log("check email: ", checkEmail);
   if (getUserByEmail(email, users)) {
     return res.status(400).send("Email has already been taken!");
   }
@@ -95,19 +90,14 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = getUserByEmail(email, users);
-  console.log("this is the user: ", user)
-
   // if user with that email cannot be found
   if (!user) {
     return res.status(403).send("This email does not exist, please try again!");
   }
-
   // if user password verification passes
-  let bcryptResponse = bcrypt.compare(password, user.password);
-  console.log("bcrypt response: ", bcryptResponse);
+  // let bcryptResponse = bcrypt.compare(password, user.password);
+  // console.log("bcrypt response: ", bcryptResponse);
   bcrypt.compare(password, user.password, (err, bres) => {
-    console.log("this is the error: ", err);
-    console.log("this is the bres: ", bres);
     if (bres == true) {
       req.session.user_id = user.id;
       res.redirect("/urls");
@@ -143,7 +133,6 @@ app.get("/urls", (req, res) => {
   }
 });
 
-// redirect to login page if user is not logged in
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id;
   if (userID) {
