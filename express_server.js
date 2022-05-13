@@ -111,7 +111,7 @@ app.post("/login", (req, res) => {
 // ** GET REQUESTS **
 
 app.get("/", (req, res) => {
-  res.redirect('/login');
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -197,7 +197,7 @@ app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
   if (!userID) {
-    res.status(403).send("You are not logged in!");
+    res.status(403).send("You're not allowed to acces or edit this URL!");
   } else {
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
@@ -212,7 +212,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.session.user_id;
   if (userID !== urlDatabase[shortURL].userID) {
-    res.status(403).send("You are not logged in!");
+    res.status(403).send("You're not allowed to acces or edit this URL!");
   } else {
     delete urlDatabase[shortURL];
     res.redirect("/urls");
